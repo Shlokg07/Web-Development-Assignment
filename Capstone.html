@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hearthome — Real Estate Listings</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <meta name="description" content="Responsive real-estate listing UI built with HTML5 & CSS3 (Flexbox + Grid)." />
+  <style>
+    /* Reset & base */
+    :root{
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --accent:#0077ff;
+      --accent-2:#0ea5a4;
+      --glass: rgba(255,255,255,0.6);
+      --shadow: 0 6px 18px rgba(12,18,57,0.06);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:linear-gradient(180deg,#f6f8fb 0%, #eef2f8 100%);
+      color:#111827;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.4;
+      padding:32px;
+    }
+    a{color:var(--accent);text-decoration:none}
+    img{max-width:100%;display:block}
+
+    /* Page layout */
+    .site{
+      max-width:1200px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: 1fr 320px;
+      gap:28px;
+      align-items:start;
+    }
+
+    header.site-header{
+      grid-column:1/-1;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:8px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px
+    }
+    .logo{
+      width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-family:Playfair Display,serif;font-size:20px;box-shadow:var(--shadow)
+    }
+    nav.primary{display:flex;gap:12px;align-items:center}
+    nav.primary a{padding:8px 12px;border-radius:10px;font-weight:600;color:var(--muted)}
+    nav.primary a:hover{background:rgba(0,0,0,0.04);color:var(--accent)}
+
+    /* Search / controls */
+    .controls{
+      display:flex;gap:12px;align-items:center;margin-top:8px;margin-bottom:18px
+    }
+    .search{
+      flex:1;display:flex;gap:8px;align-items:center;background:var(--card);padding:10px;border-radius:10px;box-shadow:var(--shadow);
+    }
+    .search input{border:0;outline:none;font-size:15px;background:transparent}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;background:var(--accent);color:white;font-weight:600;border:0;cursor:pointer}
+    .btn.secondary{background:transparent;color:var(--accent);border:1px solid rgba(0,119,255,0.12)}
+
+    /* Filters (aside) */
+    aside.filters{
+      background:transparent;padding:18px;border-radius:12px;position:sticky;top:28px;height:fit-content
+    }
+    .filters .panel{background:var(--card);padding:16px;border-radius:12px;box-shadow:var(--shadow)}
+    .filters h4{margin:0 0 12px 0;font-size:15px}
+    .form-row{display:flex;gap:8px;margin-bottom:10px}
+    .form-row label{font-size:13px;color:var(--muted);width:110px}
+    .form-row input,.form-row select{flex:1;padding:8px;border-radius:8px;border:1px solid #e6e9f0}
+    .checkbox-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .chip{padding:6px 10px;background:#f3f6fb;border-radius:999px;font-weight:600;font-size:13px;color:var(--muted)}
+
+    /* Grid & cards */
+    .listings{
+      background:transparent
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:18px;
+    }
+    .card{
+      background:var(--card);
+      border-radius:12px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;transition:transform .22s ease,box-shadow .22s ease
+    }
+    .card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(12,18,57,0.12)}
+    .card .media{height:190px;display:grid;grid-template-columns:1fr 90px}
+    .card .media .main-img{background:#ddd}
+    .card .media .thumbs{display:flex;flex-direction:column;gap:6px;padding:8px}
+    .thumbs img{height:56px;width:100%;object-fit:cover;border-radius:8px}
+    .card .body{padding:14px;display:flex;flex-direction:column;gap:10px}
+    .meta{display:flex;justify-content:space-between;align-items:center}
+    .title{font-weight:700}
+    .price{font-size:18px;color:var(--accent);font-weight:700}
+    .tags{display:flex;gap:8px;flex-wrap:wrap}
+    .tag{font-size:12px;padding:6px 8px;border-radius:8px;background:#f1f5f9;color:var(--muted)}
+
+    .specs{display:flex;gap:12px;color:var(--muted);font-size:13px}
+
+    /* Agent card */
+    .agent-card{display:flex;gap:12px;align-items:center;padding:12px;border-radius:12px;background:linear-gradient(180deg,#ffffff,#fbfdfe);box-shadow:var(--shadow)}
+    .agent-card img{width:72px;height:72px;border-radius:10px;object-fit:cover}
+    .agent-card h5{margin:0}
+    .agent-card small{color:var(--muted)}
+
+    /* Featured banner */
+    .hero{grid-column:1/-1;background:linear-gradient(90deg,rgba(0,119,255,0.06),rgba(14,165,164,0.04));padding:18px;border-radius:12px;display:flex;gap:18px;align-items:center}
+    .hero .left{flex:1}
+    .hero h1{font-family:Playfair Display,serif;margin:0;font-size:28px}
+    .hero p{color:var(--muted);margin:6px 0 0}
+
+    /* Pagination */
+    .pagination{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:18px}
+    .page{padding:8px 12px;border-radius:8px;background:var(--card);box-shadow:var(--shadow)}
+    .page.active{background:var(--accent);color:#fff}
+
+    /* Footer */
+    footer{grid-column:1/-1;margin-top:28px;padding:18px;border-radius:12px;background:transparent;display:flex;justify-content:space-between;align-items:center}
+
+    /* Responsive */
+    @media (max-width:1100px){
+      .site{grid-template-columns:1fr 300px}
+      .grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:880px){
+      body{padding:18px}
+      .site{grid-template-columns:1fr;}
+      aside.filters{order:2}
+      header.site-header{flex-direction:column;align-items:flex-start}
+      .grid{grid-template-columns:1fr}
+      .card .media{grid-template-columns:1fr 80px}
+    }
+
+    /* Small devices */
+    @media (max-width:480px){
+      .logo{width:48px;height:48px;font-size:18px}
+      .hero h1{font-size:20px}
+      nav.primary{display:none}
+      .search input{font-size:14px}
+    }
+
+    /* small polish */
+    input[type=range]{width:100%}
+    .muted{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="site">
+    <header class="site-header">
+      <div class="brand">
+        <div class="logo">H</div>
+        <div>
+          <div style="font-weight:800">Hearthome</div>
+          <div style="font-size:12px;color:var(--muted)">Real Estate · Listings · Rentals</div>
+        </div>
+      </div>
+      <nav class="primary" aria-label="Primary navigation">
+        <a href="#listings">Listings</a>
+        <a href="#agents">Agents</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="left">
+          <h1 id="hero-title">Find your next home — curated listings</h1>
+          <p>Search, filter, and explore high-quality properties with agent contacts and gallery previews.</p>
+          <div class="controls">
+            <div class="search" role="search">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.35-4.35" stroke="#94a3b8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="#94a3b8" stroke-width="1.6"/></svg>
+              <input placeholder="Search by city, postcode, or address" aria-label="Search properties">
+            </div>
+            <button class="btn">New Listing</button>
+            <button class="btn secondary">Saved</button>
+          </div>
+        </div>
+        <div class="right">
+          <div class="chip">Showing <strong>24</strong> results</div>
+        </div>
+      </section>
+
+      <section id="listings" class="listings">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0">
+          <h2 style="margin:0">Available Properties</h2>
+          <div class="muted">Sort by: <select aria-label="Sort listings"><option>Newest</option><option>Price (low-high)</option><option>Price (high-low)</option></select></div>
+        </div>
+
+        <div class="grid" role="list">
+
+          <!-- Listing Card 1 -->
+          <article class="card" role="listitem" aria-labelledby="p1-title">
+            <div class="media">
+              <div class="main-img">
+                <img src="https://images.unsplash.com/photo-1560185127-6c5f8f0e5e8b?q=80&w=1400&auto=format&fit=crop" alt="Modern house exterior">
+              </div>
+              <div class="thumbs">
+                <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?q=80&w=800&auto=format&fit=crop" alt="interior 1">
+                <img src="https://images.unsplash.com/photo-1505691723518-36a2b66b3e3b?q=80&w=800&auto=format&fit=crop" alt="interior 2">
+                <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop" alt="interior 3">
+              </div>
+            </div>
+            <div class="body">
+              <div class="meta">
+                <div>
+                  <div id="p1-title" class="title">4-Bed Family Home in Brookside</div>
+                  <div class="muted">Brookside, Springfield • 2.3 km from city center</div>
+                </div>
+                <div class="price">₹ 8,250,000</div>
+              </div>
+
+              <div class="tags">
+                <div class="tag">For Sale</div>
+                <div class="tag">3,450 sqft</div>
+                <div class="tag">3 Baths</div>
+              </div>
+
+              <div class="specs">
+                <div>🏠 4 beds</div>
+                <div>🛁 3 baths</div>
+                <div>🚗 2 garages</div>
+              </div>
+
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+                <div style="display:flex;gap:12px;align-items:center">
+                  <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop" alt="Agent" style="width:44px;height:44px;border-radius:8px;object-fit:cover">
+                  <div style="font-size:13px">
+                    <div style="font-weight:700">Aisha Kapoor</div>
+                    <div class="muted">+91 98765 43210</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <button class="btn secondary">Contact</button>
+                  <button class="btn">View</button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Listing Card 2 -->
+          <article class="card" role="listitem" aria-labelledby="p2-title">
+            <div class="media">
+              <div class="main-img">
+                <img src="https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=1400&auto=format&fit=crop" alt="Apartment glass facade">
+              </div>
+              <div class="thumbs">
+                <img src="https://images.unsplash.com/photo-1502673530728-f79b4cab31b1?q=80&w=800&auto=format&fit=crop" alt="kitchen">
+                <img src="https://images.unsplash.com/photo-1475855581690-80accde3ae9b?q=80&w=800&auto=format&fit=crop" alt="lounge">
+                <img src="https://images.unsplash.com/photo-1505691723518-36a2b66b3e3b?q=80&w=800&auto=format&fit=crop" alt="bedroom">
+              </div>
+            </div>
+            <div class="body">
+              <div class="meta">
+                <div>
+                  <div id="p2-title" class="title">Chic 2BHK Apartment — Riverfront</div>
+                  <div class="muted">Riverfront Towers • 0.9 km from metro</div>
+                </div>
+                <div class="price">₹ 5,100,000</div>
+              </div>
+
+              <div class="tags">
+                <div class="tag">For Sale</div>
+                <div class="tag">1,200 sqft</div>
+                <div class="tag">2 Beds</div>
+              </div>
+
+              <div class="specs">
+                <div>🏠 2 beds</div>
+                <div>🛁 2 baths</div>
+                <div>🌆 City view</div>
+              </div>
+
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+                <div style="display:flex;gap:12px;align-items:center">
+                  <img src="https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=200&auto=format&fit=crop" alt="Agent" style="width:44px;height:44px;border-radius:8px;object-fit:cover">
+                  <div style="font-size:13px">
+                    <div style="font-weight:700">Rahul Sharma</div>
+                    <div class="muted">+91 91234 56789</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <button class="btn secondary">Contact</button>
+                  <button class="btn">View</button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Listing Card 3 -->
+          <article class="card" role="listitem" aria-labelledby="p3-title">
+            <div class="media">
+              <div class="main-img">
+                <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=1400&auto=format&fit=crop" alt="Cozy bungalow exterior">
+              </div>
+              <div class="thumbs">
+                <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800&auto=format&fit=crop" alt="garden">
+                <img src="https://images.unsplash.com/photo-1560184897-1b70f2d2d4b9?q=80&w=800&auto=format&fit=crop" alt="pool">
+                <img src="https://images.unsplash.com/photo-1505691723518-36a2b66b3e3b?q=80&w=800&auto=format&fit=crop" alt="patio">
+              </div>
+            </div>
+            <div class="body">
+              <div class="meta">
+                <div>
+                  <div id="p3-title" class="title">Sunny Bungalow with Garden</div>
+                  <div class="muted">Maple Street • Suburban area</div>
+                </div>
+                <div class="price">₹ 6,750,000</div>
+              </div>
+
+              <div class="tags">
+                <div class="tag">For Sale</div>
+                <div class="tag">2,200 sqft</div>
+                <div class="tag">Garden</div>
+              </div>
+
+              <div class="specs">
+                <div>🏠 3 beds</div>
+                <div>🛁 2 baths</div>
+                <div>🌳 Garden</div>
+              </div>
+
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+                <div style="display:flex;gap:12px;align-items:center">
+                  <img src="https://images.unsplash.com/photo-1544723795-3fb6469f5b39?q=80&w=200&auto=format&fit=crop" alt="Agent" style="width:44px;height:44px;border-radius:8px;object-fit:cover">
+                  <div style="font-size:13px">
+                    <div style="font-weight:700">Priya Verma</div>
+                    <div class="muted">+91 99876 54321</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <button class="btn secondary">Contact</button>
+                  <button class="btn">View</button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Additional cards can be duplicated for demo -->
+
+        </div>
+
+        <div class="pagination" role="navigation" aria-label="Pagination">
+          <div class="page">Prev</div>
+          <div class="page active">1</div>
+          <div class="page">2</div>
+          <div class="page">3</div>
+          <div class="page">Next</div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="filters" aria-labelledby="filters-title">
+      <div class="panel">
+        <h4 id="filters-title">Filters</h4>
+        <form>
+          <div class="form-row">
+            <label for="type">Property</label>
+            <select id="type"><option>Any</option><option>Apartment</option><option>House</option><option>Villa</option></select>
+          </div>
+          <div class="form-row">
+            <label for="price">Price</label>
+            <input type="range" id="price" min="1000000" max="20000000" value="8000000">
+          </div>
+          <div class="form-row">
+            <label for="beds">Beds</label>
+            <select id="beds"><option>Any</option><option>1+</option><option>2+</option><option>3+</option><option>4+</option></select>
+          </div>
+
+          <div style="margin-top:8px">
+            <div style="font-weight:700;margin-bottom:8px">Amenities</div>
+            <div class="checkbox-row">
+              <label><input type="checkbox"> Pool</label>
+              <label><input type="checkbox"> Parking</label>
+              <label><input type="checkbox"> Garden</label>
+              <label><input type="checkbox"> Gym</label>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button class="btn" type="button">Apply</button>
+            <button class="btn secondary" type="reset">Reset</button>
+          </div>
+        </form>
+      </div>
+
+      <div style="height:18px"></div>
+
+      <div class="panel">
+        <h4>Contact an agent</h4>
+        <div class="agent-card">
+          <img src="https://images.unsplash.com/photo-1545996124-3b94f0b3e3be?q=80&w=400&auto=format&fit=crop" alt="Agent profile">
+          <div>
+            <h5>Rohan Mehta</h5>
+            <small class="muted">Senior Agent • 8 yrs experience</small>
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <button class="btn">Call</button>
+              <button class="btn secondary">Message</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:18px"></div>
+
+      <div class="panel" id="contact">
+        <h4>Quick Enquiry</h4>
+        <form>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <input type="text" placeholder="Your name" aria-label="Your name" style="padding:10px;border-radius:8px;border:1px solid #e6e9f0">
+            <input type="email" placeholder="Email" aria-label="Email" style="padding:10px;border-radius:8px;border:1px solid #e6e9f0">
+            <textarea placeholder="Message" rows="3" style="padding:10px;border-radius:8px;border:1px solid #e6e9f0"></textarea>
+            <button class="btn" type="submit">Send</button>
+          </div>
+        </form>
+      </div>
+    </aside>
+
+    <footer>
+      <div class="muted">© 2025 Hearthome — Built with semantic HTML5 & modern CSS</div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <a href="#about">Privacy</a>
+        <a href="#about">Terms</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
